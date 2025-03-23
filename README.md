@@ -1,6 +1,5 @@
 # Steam Transaction Analyzer
-
-A Python tool that analyzes Steam wallet transactions and generates detailed reports in both text and Excel formats. This project helps users track their Steam spending, market transactions, and overall wallet balance.
+A Python tool that analyzes Steam wallet transactions and generates detailed reports in both text and Excel formats. This project consists of two main components: a web scraper (`extractor_v3.py`) that automatically retrieves transaction data from Steam's website using Selenium and BeautifulSoup, and an analyzer (`analyze_transactions.py`) that processes the data using pandas and numpy to generate comprehensive reports. The tool helps users track their Steam spending, market transactions, and overall wallet balance by providing detailed insights into their transaction history.
 
 ## Features
 
