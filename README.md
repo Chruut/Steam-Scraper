@@ -67,10 +67,4 @@ This project uses real Steam transaction data for development and testing purpos
 
 This project is open source and available under the MIT License.
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Acknowledgments
-
-Special thanks to the project maintainer for sharing their Steam transaction data, which has been invaluable in developing and testing this tool. 
+. 
