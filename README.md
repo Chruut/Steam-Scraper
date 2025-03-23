@@ -3,11 +3,22 @@ A Python tool that analyzes Steam wallet transactions and generates detailed rep
 
 ## Features
 
-- Parses Steam wallet transaction CSV files
+### Data Collection
+- Automated Steam transaction data extraction using Selenium WebDriver
+- HTML parsing and data extraction with BeautifulSoup4
+- Automatic handling of Steam login and session management
+
+### Data Processing
+- Efficient data manipulation using pandas
+- Numerical computations with numpy
+- Smart parsing of transaction amounts and descriptions
+- Automatic categorization of market and non-market transactions
+
+### Analysis & Reporting
 - Analyzes market transactions (earnings and expenses)
 - Tracks non-market expenses
 - Generates detailed text analysis report
-- Creates formatted Excel spreadsheet for expenses
+- Creates formatted Excel spreadsheet for expenses 
 - Calculates total earnings, expenses, and net balance
 - Identifies top 5 largest transactions
 
