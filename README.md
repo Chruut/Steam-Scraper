@@ -82,5 +82,3 @@ This project uses real Steam transaction data for development and testing purpos
 ## License
 
 This project is open source and available under the MIT License.
-
-. 
