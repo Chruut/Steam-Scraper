@@ -49,7 +49,7 @@ This will install all necessary dependencies including:
 ```bash
 python extraktor.py
 ```
-2.You will be asked to log in into your steam account by a new browser window. Proceed with the login manually and it will navigate to your account's transaction history.
+2. You will be asked to log in into your steam account by a new browser window. Proceed with the login manually and it will navigate to your account's transaction history.
 
 3. Scroll down and click the 'LOAD MORE TRANSACTIONS' button
 4. Place the CSV file in the project directory as `steam_wallet_transactions.csv`
