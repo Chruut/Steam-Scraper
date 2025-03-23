@@ -20,121 +20,121 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# URL der Transaktionshistorie
+# URL of the transaction history
 TRANSACTIONS_URL = "https://store.steampowered.com/account/history/"
 
 def get_transactions():
     try:
-        # Chrome-Optionen konfigurieren
+        # Configure Chrome options
         chrome_options = Options()
-        chrome_options.add_argument("--start-maximized")  # Browser maximieren
-        chrome_options.add_argument("--disable-notifications")  # Benachrichtigungen deaktivieren
+        chrome_options.add_argument("--start-maximized")  # Maximize browser
+        chrome_options.add_argument("--disable-notifications")  # Disable notifications
         
-        # Chrome WebDriver installieren und starten
-        logging.info("Installiere Chrome WebDriver...")
+        # Install and start Chrome WebDriver
+        logging.info("Installing Chrome WebDriver...")
         service = Service(ChromeDriverManager().install())
         
-        logging.info("Starte Chrome Browser...")
+        logging.info("Starting Chrome browser...")
         driver = webdriver.Chrome(service=service, options=chrome_options)
         
         try:
-            # Transaktionsseite laden
-            logging.info(f"Lade Transaktionsseite von: {TRANSACTIONS_URL}")
+            # Load transactions page
+            logging.info(f"Loading transactions page from: {TRANSACTIONS_URL}")
             driver.get(TRANSACTIONS_URL)
             
-            # Warte auf Login-Formular (falls nicht eingeloggt)
+            # Wait for login form (if not logged in)
             try:
                 username_field = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.ID, "input_username"))
                 )
-                logging.info("Login-Formular gefunden. Bitte loggen Sie sich ein...")
+                logging.info("Login form found. Please log in...")
                 
-                # Warte auf manuelle Anmeldung
-                input("Bitte loggen Sie sich ein und drücken Sie Enter, wenn Sie fertig sind...")
+                # Wait for manual login
+                input("Please log in and press Enter when done...")
                 
-                # Warte länger nach dem Login
-                logging.info("Warte auf Laden der Transaktionsseite nach Login...")
-                time.sleep(10)  # Warte 10 Sekunden nach dem Login
+                # Wait longer after login
+                logging.info("Waiting for transaction page to load after login...")
+                time.sleep(10)  # Wait 10 seconds after login
                 
-                # Warte auf Transaktionstabelle mit längerem Timeout
-                logging.info("Suche nach Transaktionstabelle...")
-                WebDriverWait(driver, 60).until(  # Erhöhe Timeout auf 60 Sekunden
+                # Wait for transaction table with longer timeout
+                logging.info("Looking for transaction table...")
+                WebDriverWait(driver, 60).until(  # Increase timeout to 60 seconds
                     EC.presence_of_element_located((By.CLASS_NAME, "wallet_history_row"))
                 )
-                logging.info("Transaktionstabelle gefunden!")
+                logging.info("Transaction table found!")
                 
-                # Warte 10 Sekunden für manuelle Klicks auf "Load More"
-                logging.info("Warte 10 Sekunden für manuelle Klicks auf 'Load More'...")
+                # Wait 10 seconds for manual clicks on "Load More"
+                logging.info("Waiting 10 seconds for manual clicks on 'Load More'...")
                 time.sleep(10)
                 
             except Exception as e:
-                logging.info(f"Bereits eingeloggt oder Login nicht erforderlich: {str(e)}")
-                # Warte trotzdem eine Weile, falls die Seite noch lädt
+                logging.info(f"Already logged in or login not required: {str(e)}")
+                # Wait a while anyway, in case the page is still loading
                 time.sleep(10)
             
-            # Lade alle verfügbaren Transaktionen
-            logging.info("Lade alle verfügbaren Transaktionen...")
+            # Load all available transactions
+            logging.info("Loading all available transactions...")
             while True:
                 try:
-                    # Suche nach dem "Load More" Button
+                    # Look for the "Load More" button
                     load_more_button = WebDriverWait(driver, 5).until(
                         EC.element_to_be_clickable((By.CSS_SELECTOR, "button[class*='load_more_button']"))
                     )
                     
-                    # Klicke den Button
-                    logging.info("Klicke 'Load More' Button...")
+                    # Click the button
+                    logging.info("Clicking 'Load More' button...")
                     driver.execute_script("arguments[0].click();", load_more_button)
                     
-                    # Warte auf Laden der neuen Transaktionen
+                    # Wait for new transactions to load
                     time.sleep(3)
                     
-                    # Prüfe, ob neue Transaktionen geladen wurden
+                    # Check if new transactions were loaded
                     new_rows = driver.find_elements(By.CSS_SELECTOR, ".wallet_history_row")
                     if len(new_rows) <= len(rows):
-                        logging.info("Keine neuen Transaktionen geladen.")
+                        logging.info("No new transactions loaded.")
                         break
                     
                 except Exception as e:
-                    logging.info("Keine weiteren Transaktionen verfügbar oder Button nicht gefunden.")
+                    logging.info("No more transactions available or button not found.")
                     break
             
-            # Debug: Seiteninhalt ausgeben
-            logging.info("Seiteninhalt wird analysiert...")
-            logging.info(f"Seitenlänge: {len(driver.page_source)} Zeichen")
+            # Debug: Output page content
+            logging.info("Analyzing page content...")
+            logging.info(f"Page length: {len(driver.page_source)} characters")
             
-            # Parse die Seite
+            # Parse the page
             soup = BeautifulSoup(driver.page_source, "html.parser")
             
-            # Debug: Alle Tabellen auf der Seite finden
+            # Debug: Find all tables on the page
             tables = soup.find_all('table')
-            logging.info(f"Gefundene Tabellen: {len(tables)}")
+            logging.info(f"Found tables: {len(tables)}")
             
-            # Versuche verschiedene Selektoren
+            # Try different selectors
             rows = soup.select(".wallet_history_row") or soup.select("table.wallet_history_table tr") or soup.select("table tr")
             
             if not rows:
-                logging.error("Keine Transaktionen gefunden")
-                # Debug: HTML-Struktur ausgeben
-                logging.info("HTML-Struktur der Seite:")
-                logging.info(soup.prettify()[:1000])  # Erste 1000 Zeichen
+                logging.error("No transactions found")
+                # Debug: Output HTML structure
+                logging.info("Page HTML structure:")
+                logging.info(soup.prettify()[:1000])  # First 1000 characters
                 return []
             
-            logging.info(f"Gefunden: {len(rows)} Transaktionen")
+            logging.info(f"Found: {len(rows)} transactions")
             
             transactions = []
             for row in rows:
                 try:
-                    # Debug: Row-Inhalt ausgeben
-                    logging.info(f"Verarbeite Zeile: {row}")
+                    # Debug: Output row content
+                    logging.info(f"Processing row: {row}")
                     
-                    # Versuche verschiedene Selektoren für die Felder
+                    # Try different selectors for the fields
                     date = (row.select_one(".wallet_history_date") or row.select_one("td:nth-child(1)")).text.strip()
                     type_cell = (row.select_one(".wallet_history_type") or row.select_one("td:nth-child(3)")).text.strip()
                     description = (row.select_one(".wallet_history_description") or row.select_one("td:nth-child(2)")).text.strip()
                     amount = (row.select_one(".wallet_history_amount") or row.select_one("td:nth-child(5)")).text.strip()
                     total = (row.select_one(".wallet_history_total") or row.select_one("td:nth-child(4)")).text.strip()
                     
-                    # Nur Transaktionen hinzufügen, die tatsächlich Daten enthalten
+                    # Only add transactions that actually contain data
                     if date and description and amount and total:
                         transactions.append({
                             'date': date,
@@ -143,12 +143,12 @@ def get_transactions():
                             'amount': amount,
                             'total': total
                         })
-                        logging.info(f"Transaktion extrahiert: {date} - {type_cell} - {description} - {amount} - {total}")
+                        logging.info(f"Transaction extracted: {date} - {type_cell} - {description} - {amount} - {total}")
                     else:
-                        logging.warning(f"Unvollständige Transaktion gefunden: {row.text}")
+                        logging.warning(f"Incomplete transaction found: {row.text}")
                     
                 except Exception as e:
-                    logging.error(f"Fehler beim Extrahieren einer Transaktion: {e}")
+                    logging.error(f"Error extracting transaction: {e}")
                     continue
             # Clean up description field by taking only first line
             for transaction in transactions:
@@ -156,48 +156,48 @@ def get_transactions():
             return transactions
             
         finally:
-            # Browser schließen
-            logging.info("Schließe Browser...")
+            # Close browser
+            logging.info("Closing browser...")
             driver.quit()
             
     except Exception as e:
-        logging.error(f"Fehler beim Ausführen des Browsers: {e}")
+        logging.error(f"Error running browser: {e}")
         return []
 
-# Hole die Transaktionen
-logging.info("Starte Transaktionsabruf...")
+# Get the transactions
+logging.info("Starting transaction retrieval...")
 transactions = get_transactions()
 
-# Speichere in CSV
-logging.info(f"Gefundene Transaktionen: {len(transactions)}")
+# Save to CSV
+logging.info(f"Found transactions: {len(transactions)}")
 
 def parse_transaction_type(type_text):
-    """Trennt den Type-Text in Type und Source an Zeilenumbrüchen und Tabulatoren"""
-    # Teile an Zeilenumbrüchen und Tabulatoren
+    """Splits the type text into Type and Source at line breaks and tabs"""
+    # Split at line breaks and tabs
     parts = re.split(r'[\n\t]+', type_text)
     
-    # Der erste Teil ist der Type, der Rest ist die Source
+    # First part is the Type, the rest is the Source
     if len(parts) > 1:
         return parts[0].strip(), ' '.join(parts[1:]).strip()
     return type_text.strip(), ""
 
 def parse_total(total_text):
-    """Extrahiert den Total-Betrag und prüft auf Credit"""
+    """Extracts the Total amount and checks for Credit"""
     if not total_text:
-        return "", "Nein"
+        return "", "No"
     
-    # Prüfe auf Credit
+    # Check for Credit
     is_credit = "Credit" in total_text
     
-    # Extrahiere den Betrag
+    # Extract the amount
     amount_match = re.search(r'CHF\s*([\d.,]+)', total_text)
     if amount_match:
-        return amount_match.group(1), "Ja" if is_credit else "Nein"
-    return "", "Nein"
+        return amount_match.group(1), "Yes" if is_credit else "No"
+    return "", "No"
 
 with open("steam_wallet_transactions.csv", "w", newline="", encoding='utf-8') as file:
-    writer = csv.writer(file, lineterminator='\r\n')  # Windows-Style Zeilenumbrüche
-    writer.writerow(["Datum", "Type", "Source", "Beschreibung", "Change", "Total", "Credit"])
+    writer = csv.writer(file, lineterminator='\r\n')  # Windows-style line breaks
+    writer.writerow(["Date", "Type", "Source", "Description", "Change", "Total", "Credit"])
     
     for trans in transactions:
         type_value, source = parse_transaction_type(trans['type'])
@@ -212,4 +212,4 @@ with open("steam_wallet_transactions.csv", "w", newline="", encoding='utf-8') as
             is_credit
         ])
 
-logging.info("CSV-Datei wurde erstellt")
+logging.info("CSV file has been created")
